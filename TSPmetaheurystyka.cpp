@@ -90,7 +90,10 @@ int main()
 	path ** macierz;
 	macierz = new path * [n+1];
 	for (int i = 1; i <= n; i++) macierz[i] = new path[n+1];
-	for(int i=0;i<=n;i++) for(int j=0;j<=n;j++) macierz[i][j].distance=0;
+	for (int i = 0; i <= n; i++) 
+	    for (int j = 0; j <= n; j++) 
+		macierz[i][j].distance = 0;  
+		macierz[i][j].feromony = 1.0;
 	macierzfill(n,macierz,list);
 	for(int i=1;i<=n;i++) for(int j=1;j<=i;j++) macierz[j][i].distance=macierz[i][j].distance;
 	for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<macierz[i][j].distance<<" "; cout<<endl;}//wypisuje macierz odleg³oœci
