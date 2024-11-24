@@ -99,19 +99,17 @@ void update_pheromones(int A, int n, int** paths, path** matrix, float Q, float 
             int city1 = paths[i][ant];
             int city2 = paths[i + 1][ant];
             float pheromone_deposit = Q / path_length;
-
             matrix[city1][city2].pheromons += pheromone_deposit;
             matrix[city2][city1].pheromons += pheromone_deposit;
         }
         int last_city = paths[A - 1][ant];
         int first_city = paths[0][ant];
         float pheromone_deposit = Q / path_length;
-
         matrix[last_city][first_city].pheromons += pheromone_deposit;
         matrix[first_city][last_city].pheromons += pheromone_deposit;
     }
 }
-void antclony(int n,path ** matrix,int ** paths)//g³ówna funkcja
+void antclony(int n,path ** matrix,int ** paths)//gï¿½ï¿½wna funkcja
 {
 	int counter=0;
 	while(counter<iterations)
@@ -142,14 +140,23 @@ int main()
 	//for(int i=1;i<=n;i++) cout<<i<<" "<<list[i].X<<" "<<list[i].Y<<endl;//wypisuje wczytane dane 
 	path ** matrix;
 	matrix = new path * [n+1];
-	for (int i = 1; i <= n; i++) matrix[i] = new path[n+1];
+	for (int i = 0; i <= n; i++) matrix[i] = new path[n+1];
 	for (int i = 0; i <= n; i++) for (int j = 0; j <= n; j++) {matrix[i][j].distance=0;  matrix[i][j].pheromons=0.1;}
 	matrixfill(n,matrix,list);
 	for(int i=1;i<=n;i++) for(int j=1;j<=i;j++) matrix[j][i].distance=matrix[i][j].distance; //making matrix symetrical
 	int ** paths;
-	paths = new int * [A];
+	paths = new int*[A];
 	for (int i=0;i<A;i++) paths[i] = new int[n+1];
 	antclony(n,matrix,paths);
-	//for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<macierz[i][j].distance<<" "; cout<<endl;}//wypisuje macierz odleg³oœci
+	//for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<macierz[i][j].distance<<" "; cout<<endl;}//wypisuje macierz odlegï¿½oï¿½ci
+	for (int i = 0; i < A; i++) {
+        delete[] paths[i];
+    }
+    delete[] paths;
+
+    for (int i = 0; i <= n; i++) {
+        delete[] matrix[i];
+    }
+    delete[] matrix;
 	return 0;
 }
