@@ -25,7 +25,7 @@ struct points
 struct path
 {
 	float pheromons;
-	int distance;
+	float distance;
 };
 void matrixfill(int n,path ** matrix,points * list) //calulates distance from coordinates
 {
@@ -129,7 +129,7 @@ void antclony(int n, path **matrix, int **paths) // Main function
         }
         
         for (int i = 0; i < A; i++) {
-            int total_length = 0;
+            float total_length = 0;
             for (int j = 0; j < n; j++) {
                 int city1 = paths[i][j];
                 int city2 = paths[i][j + 1];

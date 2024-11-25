@@ -8,7 +8,7 @@ using namespace std;
 
 const int N=100;
 
-void greedy(int n,int ** macierz) //algorytm zach³anny dla TSP
+void greedy(int n,int ** macierz) //algorytm zachï¿½anny dla TSP
 {
 	cout<<endl;
 	int min[2];
@@ -29,23 +29,46 @@ void greedy(int n,int ** macierz) //algorytm zach³anny dla TSP
 		macierz[i][min[1]]=0;
 		for(int k=0;k<n;k++) macierz[k][i]=0;
 		i=min[1];
-		if(min[0]==N) {i=0; cout<<i<<endl;} //ostatni przypadek powrót do pocz¹tku
-		//for(int i=0;i<n;i++) {for(int j=0;j<n;j++) cout<<macierz[i][j]<<" "; cout<<endl;} cout<<endl; // wyœwietlanie zmian w tablicy
+		if(min[0]==N) {i=0; cout<<i<<endl;} //ostatni przypadek powrï¿½t do poczï¿½tku
+		//for(int i=0;i<n;i++) {for(int j=0;j<n;j++) cout<<macierz[i][j]<<" "; cout<<endl;} cout<<endl; // wyï¿½wietlanie zmian w tablicy
 	}
 }
 int main()
 {
 	int n;
-	cout<<"Podaj liczbe wierzcholkow: ";
-	cin>>n;
+	srand(time(NULL));//przygotowanie generatora liczb pseudolosowych
+	int n;
+	ifstream plik;
+	plik.open("dane.txt");
+	plik>>n;
+	points * list = new points[n+1];
+	for(int i=1;i<=n;i++)
+	{
+		plik>>i>>list[i].X>>list[i].Y;
+	}
+	plik.close();
 	int ** macierz;
 	macierz = new int * [n];
 	for (int i = 0; i < n; i++) macierz[i] = new int[n];
 	for(int i=0;i<n;i++) for(int j=0;j<n;j++) macierz[i][j]=0;
-	for(int i=0;i<n;i++) for(int j=0;j<i;j++) macierz[i][j]=rand()%9+1;
+	//for(int i=0;i<n;i++) for(int j=0;j<i;j++) macierz[i][j]=rand()%9+1;
 	for(int i=0;i<n;i++) for(int j=0;j<i;j++) macierz[j][i]=macierz[i][j];
-	for(int i=0;i<n;i++) {for(int j=0;j<n;j++) cout<<macierz[i][j]<<" "; cout<<endl;}
+	//for(int i=0;i<n;i++) {for(int j=0;j<n;j++) cout<<macierz[i][j]<<" "; cout<<endl;}
 	srand(time(NULL));
 	greedy(n,macierz);
+
+	srand(time(NULL));//przygotowanie generatora liczb pseudolosowych
+	int n;
+	ifstream plik;
+	plik.open("dane.txt");
+	//plik.open("test.txt");
+	plik>>n;
+	points * list = new points[n+1];
+	for(int i=1;i<=n;i++)
+	{
+		plik>>i>>list[i].X>>list[i].Y;
+	}
+	plik.close();
+
 	return 0;
 }
