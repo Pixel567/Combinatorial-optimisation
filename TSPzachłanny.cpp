@@ -1,14 +1,23 @@
 #include <iostream>
+#include<fstream>
 #include<stddef.h>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <cmath>
+#include <vector>
+#include <climits>
 
 using namespace std;
 
-const int N=100;
+const int N=100000;
+struct points
+{
+	int X;
+	int Y;
+};
 
-void greedy(int n,int ** macierz) //algorytm zach�anny dla TSP
+void greedy(int n,float ** macierz) //algorytm zach�anny dla TSP
 {
 	cout<<endl;
 	int min[2];
@@ -33,11 +42,21 @@ void greedy(int n,int ** macierz) //algorytm zach�anny dla TSP
 		//for(int i=0;i<n;i++) {for(int j=0;j<n;j++) cout<<macierz[i][j]<<" "; cout<<endl;} cout<<endl; // wy�wietlanie zmian w tablicy
 	}
 }
+void matrixfill(int n,float ** macierz,points * list) //calulates distance from coordinates
+{
+	for(int i=1;i<=n;i++)
+		for(int j=1;j<i;j++)
+		{
+			if(i!=j)
+			{
+				macierz[i][j]=sqrt(pow(list[i].X-list[j].X,2)+pow(list[i].Y-list[j].Y,2));
+			}
+		}
+}
 int main()
 {
 	int n;
 	srand(time(NULL));//przygotowanie generatora liczb pseudolosowych
-	int n;
 	ifstream plik;
 	plik.open("dane.txt");
 	plik>>n;
@@ -47,28 +66,19 @@ int main()
 		plik>>i>>list[i].X>>list[i].Y;
 	}
 	plik.close();
-	int ** macierz;
-	macierz = new int * [n];
-	for (int i = 0; i < n; i++) macierz[i] = new int[n];
-	for(int i=0;i<n;i++) for(int j=0;j<n;j++) macierz[i][j]=0;
+	float ** macierz;
+	macierz = new float * [n+1];
+	for (int i = 0; i <= n; i++) macierz[i] = new float[n+1];
+	for(int i=0;i<=n;i++) for(int j=0;j<=n;j++) macierz[i][j]=0;
 	//for(int i=0;i<n;i++) for(int j=0;j<i;j++) macierz[i][j]=rand()%9+1;
-	for(int i=0;i<n;i++) for(int j=0;j<i;j++) macierz[j][i]=macierz[i][j];
+	for(int i=0;i<=n;i++) for(int j=0;j<=i;j++) macierz[j][i]=macierz[i][j];
 	//for(int i=0;i<n;i++) {for(int j=0;j<n;j++) cout<<macierz[i][j]<<" "; cout<<endl;}
-	srand(time(NULL));
+	matrixfill(n,macierz,list);
 	greedy(n,macierz);
-
-	srand(time(NULL));//przygotowanie generatora liczb pseudolosowych
-	int n;
-	ifstream plik;
-	plik.open("dane.txt");
-	//plik.open("test.txt");
-	plik>>n;
-	points * list = new points[n+1];
-	for(int i=1;i<=n;i++)
-	{
-		plik>>i>>list[i].X>>list[i].Y;
-	}
-	plik.close();
-
+	for (int i = 0; i <= n; i++) {
+        delete[] macierz[i];
+    }
+    delete[] macierz;
+	delete[] list;
 	return 0;
 }

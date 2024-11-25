@@ -191,6 +191,7 @@ int main()
 	for (int i=0;i<A;i++) paths[i] = new int[n+1];
 	antclony(n,matrix,paths);
 	//for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<macierz[i][j].distance<<" "; cout<<endl;}//wypisuje macierz odleg�o�ci
+    delete[] list;
 	for (int i = 0; i < A; i++) {
         delete[] paths[i];
     }
