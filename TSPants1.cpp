@@ -164,21 +164,35 @@ void antclony(int n, path **matrix, int **paths) // Main function
     }
     cout << "Length: " << overall_best_length << endl;
 }
-
+void generator(int n,points * list){
+	for(int i=1;i<=n;i++)
+	{
+		list[i].X=rand()%20; list[i].Y=rand()%20;
+		cout<<i<<" "<<list[i].X<<" "<<list[i].Y<<endl;
+	}
+}
 int main()
 {
 	srand(time(NULL));//przygotowanie generatora liczb pseudolosowych
-	int n;
+	int n=20,choice;
+	
+	///////////////////////////////////////////////<- data generation
+	///*  deactivate to turn on generator
 	ifstream plik;
 	plik.open("dane.txt");
-	//plik.open("test.txt");
-	plik>>n;
+	plik>>n;//*/
+	
 	points * list = new points[n+1];
+	
+	///* deactivate to turn on generator
 	for(int i=1;i<=n;i++)
 	{
 		plik>>i>>list[i].X>>list[i].Y;
 	}
 	plik.close();
+	//*/
+	//generator(n,list); //generator
+	///////////////////////////////////////////////
 	//for(int i=1;i<=n;i++) cout<<i<<" "<<list[i].X<<" "<<list[i].Y<<endl;//wypisuje wczytane dane 
 	path ** matrix;
 	matrix = new path * [n+1];
