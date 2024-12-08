@@ -10,10 +10,10 @@
 using namespace std;
 
 const int A = 20;        // number of ants in generation
-const int fer = 12;       // power of pheromons in choosing next city
-const int dis = 6;       // power of distance in choosing next city
+const int fer = 1;       // power of pheromons in choosing next city
+const int dis = 3;       // power of distance in choosing next city
 const float rho = 0.5;   // Evaporation rate
-const float Q = 100.0;    // Pheromone deposition constant
+const float Q = 100.0;   // Pheromone deposition constant
 const int iterations = 2000;
 
 struct points {
@@ -43,31 +43,39 @@ void ant(int n, int m, path **matrix, int **paths) {
         copy[i] = new int[n + 1];
     }
 
+    // Copy distance values
     for (int i = 0; i <= n; i++) {
         for (int j = 0; j <= n; j++) {
             copy[i][j] = matrix[i][j].distance;
         }
     }
 
-    int node = rand() % n + 1;  // Choosing a random first city
+    // Choose a random start city
+    int node = rand() % n + 1;
     paths[m][0] = node;
 
+    // Remove paths to the start city
     for (int k = 1; k <= n; k++) {
-        copy[k][node] = 0;  // Removing paths to the first city
+        copy[k][node] = 0;
     }
 
-    vector<int> c;
+    vector<bool> visited(n + 1, false);  // Array to track visited cities
+    visited[node] = true;  // Mark the start city as visited
+
     int length = 1;
 
+    // Loop through cities
     while (length < n) {
         vector<float> probability(n + 1, 0);
+        
+        // Calculate the probability of choosing each city
         for (int i = 1; i <= n; i++) {
-            if (copy[node][i] != 0) {
+            if (copy[node][i] != 0 && !visited[i]) {
                 probability[i] = pow(matrix[node][i].pheromons, fer) * pow(matrix[node][i].distance, -dis);
             }
         }
 
-        // Normalize the probability distribution
+        // Normalize the probability values
         float total_prob = 0;
         for (int i = 1; i <= n; i++) {
             total_prob += probability[i];
@@ -76,7 +84,7 @@ void ant(int n, int m, path **matrix, int **paths) {
             probability[i] /= total_prob;
         }
 
-        // Choose next node based on probability
+        // Choose the next city based on probability
         float rand_val = (float)rand() / RAND_MAX;
         float cumulative_prob = 0;
         for (int i = 1; i <= n; i++) {
@@ -87,15 +95,18 @@ void ant(int n, int m, path **matrix, int **paths) {
             }
         }
 
+        // Add the chosen city to the path
         paths[m][length] = node;
+        visited[node] = true;  // Mark the city as visited
         length++;
 
-        // Remove paths to the chosen city
+        // Remove the path to the chosen city
         for (int i = 1; i <= n; i++) {
             copy[i][node] = 0;
         }
     }
 
+    // Free memory
     delete[] copy;
 }
 
