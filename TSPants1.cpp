@@ -1,221 +1,236 @@
 #include <iostream>
-#include<fstream>
-#include<stddef.h>
-#include <cstdlib>
-#include <ctime>
-#include <chrono>
+#include <fstream>
 #include <cmath>
 #include <vector>
 #include <climits>
+#include <cstdlib>
+#include <ctime>
+#include <chrono>
+
 using namespace std;
 
-const int A=50; //number of ants in generation
-const int fer=5; //power of pheromons in choosing next city
-const int dis=1; //power of distance in choosing next city
-const float rho = 0.1;    // Evaporation rate
-const float Q = 10.0;    // Pheromone deposition constant
-const int iterations = 1000;
+const int A = 20;        // number of ants in generation
+const int fer = 12;       // power of pheromons in choosing next city
+const int dis = 6;       // power of distance in choosing next city
+const float rho = 0.5;   // Evaporation rate
+const float Q = 100.0;    // Pheromone deposition constant
+const int iterations = 2000;
 
-struct points
-{
-	int X;
-	int Y;
+struct points {
+    int X;
+    int Y;
 };
-struct path
-{
-	float pheromons;
-	float distance;
+
+struct path {
+    float pheromons;
+    float distance;
 };
-void matrixfill(int n,path ** matrix,points * list) //calulates distance from coordinates
-{
-	for(int i=1;i<=n;i++)
-		for(int j=1;j<i;j++)
-		{
-			if(i!=j)
-			{
-				matrix[i][j].distance=sqrt(pow(list[i].X-list[j].X,2)+pow(list[i].Y-list[j].Y,2));
-			}
-		}
-}
-void ant(int n,int m,path ** matrix,int ** paths)//number of cities, number of ants, matrix of distances and pheromons, list of paths to be generated
-{
-	int ** copy;
-	copy = new int * [n+1];
-	for (int i = 0; i <= n; i++) copy[i] = new int[n+1];
-	for(int i=0;i<=n;i++) for(int j=0;j<=n;j++) copy[i][j]=matrix[i][j].distance; //craeting copy of distance matrix
-	int node=rand()%n+1; //choosing random first city
-	//cout<<node<<endl;
-	paths[m][n]=node;
-	for(int k=1;k<=n;k++) copy[k][node]=0; //removing paths to first city
-	int lenght=0;
-	int choice=0;
-	float probability[n+1];
-	vector<int> c;
-	while(lenght<n-1)
-	{
-		for(int i=0;i<=n;i++) probability[i]=0;
-		paths[m][lenght]=node; //adding node to solution
-		for(int j=1;j<=n;j++)
-		{
-			if(copy[node][j]!=0)
-			{
-				probability[j]=pow(matrix[node][j].pheromons,fer)*pow(matrix[node][j].distance,-dis);//calculating probability of next nodes
-				//cout<<probability[j]<<" ";
-			}
-		}
-		for(int j=1;j<=n;j++)
-		{
-			for(int k=0;k<probability[j];k++) c.push_back(j);
-		}
-		//for(int j=0;j<c.size();j++) cout<<c[j]<<" ";
-		choice=c[rand()%c.size()];//choosing next node
-		c.clear();
-		copy[node][choice]=0;
-		for(int k=1;k<=n;k++) copy[k][choice]=0; //removing paths to node
-		node=choice;
-		lenght++;
-		//cout<<choice<<endl;
-		//for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<copy[i][j]<<" "; cout<<endl;} cout<<endl;
-	}
-	paths[m][lenght]=node; //adding last node to solution not counting the first as last
-	for(int i=0;i<=n;i++) delete[] copy[i];
-	delete[] copy;
-}
-void update_pheromones(int A, int n, int** paths, path** matrix, float Q, float rho) {
-    for (int i = 1; i <= A; i++) {
-        for (int j = 1; j <= A; j++) {
-            matrix[i][j].pheromons *= (1 - rho);  // Apply evaporation
+
+void matrixfill(int n, path **matrix, points *list) {
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j < i; j++) {
+            if (i != j) {
+                matrix[i][j].distance = sqrt(pow(list[i].X - list[j].X, 2) + pow(list[i].Y - list[j].Y, 2));
+                matrix[j][i].distance = matrix[i][j].distance; // making matrix symmetrical
+            }
         }
     }
-    for (int ant = 0; ant < n; ant++) {
+}
+
+void ant(int n, int m, path **matrix, int **paths) {
+    int **copy = new int *[n + 1];
+    for (int i = 0; i <= n; i++) {
+        copy[i] = new int[n + 1];
+    }
+
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            copy[i][j] = matrix[i][j].distance;
+        }
+    }
+
+    int node = rand() % n + 1;  // Choosing a random first city
+    paths[m][0] = node;
+
+    for (int k = 1; k <= n; k++) {
+        copy[k][node] = 0;  // Removing paths to the first city
+    }
+
+    vector<int> c;
+    int length = 1;
+
+    while (length < n) {
+        vector<float> probability(n + 1, 0);
+        for (int i = 1; i <= n; i++) {
+            if (copy[node][i] != 0) {
+                probability[i] = pow(matrix[node][i].pheromons, fer) * pow(matrix[node][i].distance, -dis);
+            }
+        }
+
+        // Normalize the probability distribution
+        float total_prob = 0;
+        for (int i = 1; i <= n; i++) {
+            total_prob += probability[i];
+        }
+        for (int i = 1; i <= n; i++) {
+            probability[i] /= total_prob;
+        }
+
+        // Choose next node based on probability
+        float rand_val = (float)rand() / RAND_MAX;
+        float cumulative_prob = 0;
+        for (int i = 1; i <= n; i++) {
+            cumulative_prob += probability[i];
+            if (rand_val <= cumulative_prob) {
+                node = i;
+                break;
+            }
+        }
+
+        paths[m][length] = node;
+        length++;
+
+        // Remove paths to the chosen city
+        for (int i = 1; i <= n; i++) {
+            copy[i][node] = 0;
+        }
+    }
+
+    delete[] copy;
+}
+
+void update_pheromones(int A, int n, int **paths, path **matrix, float Q, float rho) {
+    // Evaporation
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            matrix[i][j].pheromons *= (1 - rho);
+        }
+    }
+
+    // Pheromone deposition based on ant paths
+    for (int ant = 0; ant < A; ant++) {
         float path_length = 0.0;
-        for (int i = 0; i < A - 1; i++) {
-            int city1 = paths[i][ant];
-            int city2 = paths[i + 1][ant];
+        for (int i = 0; i < n - 1; i++) {
+            int city1 = paths[ant][i];
+            int city2 = paths[ant][i + 1];
             path_length += matrix[city1][city2].distance;
         }
-	// Calculate distances
-        path_length += matrix[paths[A - 1][ant]][paths[0][ant]].distance;
 
-        for (int i = 0; i < A - 1; i++) {
-            int city1 = paths[i][ant];
-            int city2 = paths[i + 1][ant];
+        // Add the return distance to the first city
+        path_length += matrix[paths[ant][n - 1]][paths[ant][0]].distance;
+
+        for (int i = 0; i < n - 1; i++) {
+            int city1 = paths[ant][i];
+            int city2 = paths[ant][i + 1];
             float pheromone_deposit = Q / path_length;
             matrix[city1][city2].pheromons += pheromone_deposit;
             matrix[city2][city1].pheromons += pheromone_deposit;
         }
-        int last_city = paths[A - 1][ant];
-        int first_city = paths[0][ant];
+
+        // Add the last leg of the tour
+        int last_city = paths[ant][n - 1];
+        int first_city = paths[ant][0];
         float pheromone_deposit = Q / path_length;
         matrix[last_city][first_city].pheromons += pheromone_deposit;
         matrix[first_city][last_city].pheromons += pheromone_deposit;
     }
 }
-void antclony(int n, path **matrix, int **paths) // Main function
-{
-    int counter = 0;
-    int best_path_index = -1;  // To store the index of the best path
-    int best_length = INT_MAX; // Initialize with a large value (infinity)
-    int overall_best_length = INT_MAX; // Best path length across all iterations
-    int overall_best_index = -1; // Best path index across all iterations
 
-    while (counter < iterations)
-    {
-        int iteration_best_length = INT_MAX; 
-        int iteration_best_index = -1;  
+void antcolony(int n, path **matrix, int **paths) {
+    int best_length = INT_MAX;
+    int best_index = -1;
+    int overall_best_length = INT_MAX;
+    int overall_best_index = -1;
 
-        for (int i = 0; i < A; i++) 
-        {
+    for (int iteration = 0; iteration < iterations; iteration++) {
+        for (int i = 0; i < A; i++) {
             ant(n, i, matrix, paths);
         }
-        
+
+        // Find the best path in this iteration
+        int iteration_best_length = INT_MAX;
+        int iteration_best_index = -1;
         for (int i = 0; i < A; i++) {
             float total_length = 0;
-            for (int j = 0; j < n; j++) {
+            for (int j = 0; j < n - 1; j++) {
                 int city1 = paths[i][j];
                 int city2 = paths[i][j + 1];
                 total_length += matrix[city1][city2].distance;
             }
+
+            // Add the return distance to the first city
+            total_length += matrix[paths[i][n - 1]][paths[i][0]].distance;
 
             if (total_length < iteration_best_length) {
                 iteration_best_length = total_length;
                 iteration_best_index = i;
             }
         }
-		/*
-        cout << "Iteration " << counter + 1 << " Best Path: ";
-        for (int j = 0; j <= n; j++) {
-            cout << paths[iteration_best_index][j] << " ";  // Print the cities in the best path
-        }
-        cout << "Length: " << iteration_best_length << endl;
-		//*/
+
         if (iteration_best_length < overall_best_length) {
             overall_best_length = iteration_best_length;
             overall_best_index = iteration_best_index;
         }
 
         update_pheromones(A, n, paths, matrix, Q, rho);
-        counter++;
     }
-	if (overall_best_length < INT_MAX) {
-    	for (int i = 0; i < n; i++) {
-        	int city1 = paths[overall_best_index][i];
-        	int city2 = paths[overall_best_index][(i + 1) % n];
-        	float elite_pheromone_deposit = Q / overall_best_length;
-        	matrix[city1][city2].pheromons += elite_pheromone_deposit;
-        	matrix[city2][city1].pheromons += elite_pheromone_deposit;
-    	}
-	}
-    // At the end of all iterations, print the best overall path
+
+    // Output the best path found
     cout << "Best Overall Path: ";
-    for (int j = 0; j <= n; j++) {
-        cout << paths[overall_best_index][j] << " ";  // Print the cities in the overall best path
+    for (int i = 0; i < n; i++) {
+        cout << paths[overall_best_index][i] << " ";
     }
-    cout << "Length: " << overall_best_length << endl;
+    cout << endl << "Length: " << overall_best_length << endl;
 }
-void generator(int n,points * list){
-	for(int i=1;i<=n;i++)
-	{
-		list[i].X=rand()%20; list[i].Y=rand()%20;
-		cout<<i<<" "<<list[i].X<<" "<<list[i].Y<<endl;
-	}
+
+void generator(int n, points *list) {
+    for (int i = 1; i <= n; i++) {
+        list[i].X = rand() % 20;
+        list[i].Y = rand() % 20;
+        cout << i << " " << list[i].X << " " << list[i].Y << endl;
+    }
 }
-int main()
-{
-	srand(time(NULL));//przygotowanie generatora liczb pseudolosowych
-	int n=20,choice;
-	
-	///////////////////////////////////////////////<- data generation
-	///*  deactivate to turn on generator
-	ifstream plik;
-	plik.open("dane.txt");
-	plik>>n;//*/
-	
-	points * list = new points[n+1];
-	
-	///* deactivate to turn on generator
-	for(int i=1;i<=n;i++)
-	{
-		plik>>i>>list[i].X>>list[i].Y;
-	}
-	plik.close();
-	//*/
-	//generator(n,list); //generator
-	///////////////////////////////////////////////
-	//for(int i=1;i<=n;i++) cout<<i<<" "<<list[i].X<<" "<<list[i].Y<<endl;//wypisuje wczytane dane 
-	path ** matrix;
-	matrix = new path * [n+1];
-	for (int i = 0; i <= n; i++) matrix[i] = new path[n+1];
-	for (int i = 0; i <= n; i++) for (int j = 0; j <= n; j++) {matrix[i][j].distance=0;  matrix[i][j].pheromons=0.1;}
-	matrixfill(n,matrix,list);
-	for(int i=1;i<=n;i++) for(int j=1;j<=i;j++) matrix[j][i].distance=matrix[i][j].distance; //making matrix symetrical
-	int ** paths;
-	paths = new int*[A];
-	for (int i=0;i<A;i++) paths[i] = new int[n+1];
-	antclony(n,matrix,paths);
-	//for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<macierz[i][j].distance<<" "; cout<<endl;}//wypisuje macierz odleg�o�ci
+
+int main() {
+    srand(time(NULL));
+
+    int n = 20;
+
+    // Load data from file or generate random data
+    ifstream plik("dane.txt");
+    plik >> n;
+
+    points *list = new points[n + 1];
+    for (int i = 1; i <= n; i++) {
+        plik >> i >> list[i].X >> list[i].Y;
+    }
+    plik.close();
+
+    path **matrix = new path *[n + 1];
+    for (int i = 0; i <= n; i++) {
+        matrix[i] = new path[n + 1];
+    }
+
+    // Initialize matrix
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            matrix[i][j].distance = 0;
+            matrix[i][j].pheromons = 0.1;
+        }
+    }
+
+    matrixfill(n, matrix, list);
+
+    int **paths = new int *[A];
+    for (int i = 0; i < A; i++) {
+        paths[i] = new int[n];
+    }
+
+    antcolony(n, matrix, paths);
+
+    // Clean up memory
     delete[] list;
-	for (int i = 0; i < A; i++) {
+    for (int i = 0; i < A; i++) {
         delete[] paths[i];
     }
     delete[] paths;
@@ -224,5 +239,6 @@ int main()
         delete[] matrix[i];
     }
     delete[] matrix;
-	return 0;
+
+    return 0;
 }
