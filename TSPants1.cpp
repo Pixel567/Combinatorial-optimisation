@@ -9,13 +9,12 @@
 #include <climits>
 using namespace std;
 
-const int A=1; //number of ants in generation
-const int fer=1; //power of pheromons in choosing next city
+const int A=50; //number of ants in generation
+const int fer=5; //power of pheromons in choosing next city
 const int dis=1; //power of distance in choosing next city
-const int num_ants = 10;  // Number of ants
-const float rho = 0.5;    // Evaporation rate
-const float Q = 100.0;    // Pheromone deposition constant
-const int iterations = 100;
+const float rho = 0.1;    // Evaporation rate
+const float Q = 10.0;    // Pheromone deposition constant
+const int iterations = 1000;
 
 struct points
 {
@@ -79,6 +78,8 @@ void ant(int n,int m,path ** matrix,int ** paths)//number of cities, number of a
 		//for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++) cout<<copy[i][j]<<" "; cout<<endl;} cout<<endl;
 	}
 	paths[m][lenght]=node; //adding last node to solution not counting the first as last
+	for(int i=0;i<=n;i++) delete[] copy[i];
+	delete[] copy;
 }
 void update_pheromones(int A, int n, int** paths, path** matrix, float Q, float rho) {
     for (int i = 1; i <= A; i++) {
@@ -141,13 +142,13 @@ void antclony(int n, path **matrix, int **paths) // Main function
                 iteration_best_index = i;
             }
         }
-
+		/*
         cout << "Iteration " << counter + 1 << " Best Path: ";
         for (int j = 0; j <= n; j++) {
             cout << paths[iteration_best_index][j] << " ";  // Print the cities in the best path
         }
         cout << "Length: " << iteration_best_length << endl;
-
+		//*/
         if (iteration_best_length < overall_best_length) {
             overall_best_length = iteration_best_length;
             overall_best_index = iteration_best_index;
@@ -156,7 +157,15 @@ void antclony(int n, path **matrix, int **paths) // Main function
         update_pheromones(A, n, paths, matrix, Q, rho);
         counter++;
     }
-
+	if (overall_best_length < INT_MAX) {
+    	for (int i = 0; i < n; i++) {
+        	int city1 = paths[overall_best_index][i];
+        	int city2 = paths[overall_best_index][(i + 1) % n];
+        	float elite_pheromone_deposit = Q / overall_best_length;
+        	matrix[city1][city2].pheromons += elite_pheromone_deposit;
+        	matrix[city2][city1].pheromons += elite_pheromone_deposit;
+    	}
+	}
     // At the end of all iterations, print the best overall path
     cout << "Best Overall Path: ";
     for (int j = 0; j <= n; j++) {
