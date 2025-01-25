@@ -152,7 +152,7 @@ void antcolony(int n, path **matrix, int **paths,auto startTime) {
 
     cout << "Best Overall Path: ";
     for (int i = 0; i <= n; i++) {
-        cout << best_path[i] << " ";
+        cout << best_path[i]+1 << " ";
     }
     cout << endl << "Length: " << overall_best_length << endl;
 
