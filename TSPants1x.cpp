@@ -5,6 +5,7 @@
 #include <climits>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ const int dis = 3;       // Power of distance in choosing the next city
 const float rho = 0.2;   // Pheromone evaporation coefficient
 const float Q = 100.0;   // Pheromone deposit constant
 const int iterations = 500; // Number of iterations
+const int timer=30; //upper time of program working in seconds
 
 struct points {
     int X;
@@ -116,7 +118,7 @@ void update_pheromones(int A, int n, int **paths, path **matrix, float Q, float 
     }
 }
 
-void antcolony(int n, path **matrix, int **paths) {
+void antcolony(int n, path **matrix, int **paths,auto startTime) {
     int overall_best_length = INT_MAX;
     int *best_path = new int[n + 1];
 
@@ -142,6 +144,10 @@ void antcolony(int n, path **matrix, int **paths) {
         }
 
         update_pheromones(A, n, paths, matrix, Q, rho);
+
+        auto currentTime=chrono::steady_clock::now(); //stoping program using timer
+        auto elapsedTime=chrono::duration_cast<std::chrono::seconds>(currentTime-startTime).count();
+        if(elapsedTime>=timer) break;
     }
 
     cout << "Best Overall Path: ";
@@ -156,7 +162,7 @@ void antcolony(int n, path **matrix, int **paths) {
 int main() {
     srand(time(NULL));
 
-    ifstream plik("dane.txt");
+    ifstream plik("bier127.txt");
     int n;
     plik >> n;
 
@@ -178,8 +184,10 @@ int main() {
     for (int i = 0; i < A; i++) {
         paths[i] = new int[n + 1];
     }
+    
+    auto startTime=chrono::steady_clock::now();
 
-    antcolony(n, matrix, paths);
+    antcolony(n, matrix, paths,startTime);
 
     // Clearing memory
     delete[] list;
